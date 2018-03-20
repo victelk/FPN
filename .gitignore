@@ -1,0 +1,11 @@
+*.so
+*.o
+*.pyc
+output
+tensorboard
+logs
+lib/build
+lib/pycocotools
+lib/pycocotools/_mask.c
+lib/pycocotools/_mask.so
+.idea

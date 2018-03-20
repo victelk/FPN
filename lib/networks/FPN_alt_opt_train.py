@@ -496,11 +496,11 @@ class FPN_alt_opt_train(Network):
         # add regularizer
         if cfg.TRAIN.WEIGHT_DECAY > 0:
             regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-            print 'regularization_losses: '
-            print regularization_losses
+            print('regularization_losses: ')
+            print(regularization_losses)
             regularization_losses = [v for v in regularization_losses for vs in vs_name if v.op.name.startswith(vs + '/')]
-            print 'filtered regularization_losses: '
-            print regularization_losses
+            print('filtered regularization_losses: ')
+            print(regularization_losses)
             rpn_loss = tf.add_n(regularization_losses) + rpn_loss
 
         return rpn_loss, rpn_cross_entropy, rpn_loss_box
@@ -533,11 +533,11 @@ class FPN_alt_opt_train(Network):
         # add regularizer
         if cfg.TRAIN.WEIGHT_DECAY > 0:
             regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-            print 'regularization_losses: '
-            print regularization_losses
+            print('regularization_losses: ')
+            print(regularization_losses)
             regularization_losses = [v for v in regularization_losses for vs in vs_name if v.op.name.startswith(vs + '/')]
-            print 'filtered regularization_losses: '
-            print regularization_losses
+            print('filtered regularization_losses: ')
+            print(regularization_losses)
             loss = tf.add_n(regularization_losses) + loss
 
         return loss, cross_entropy, loss_box

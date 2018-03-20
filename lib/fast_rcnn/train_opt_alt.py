@@ -9,7 +9,7 @@
 import numpy as np
 import os
 import pprint
-import cPickle
+import pickle
 import tensorflow as tf
 from tensorflow.python.client import timeline
 import cv2
@@ -50,9 +50,9 @@ class SolverWrapper(object):
                                              flush_secs=5)
 
 
-        print 'Computing bounding-box regression targets...'
+        print('Computing bounding-box regression targets...')
         self.bbox_means, self.bbox_stds = rdl_roidb.add_bbox_regression_targets(roidb)
-        print 'done'
+        print('done')
 
         self.global_step = tf.Variable(0, trainable=False)
 
@@ -71,7 +71,7 @@ class SolverWrapper(object):
         """
         net = self.net
 
-        if cfg.TRAIN.BBOX_REG and net.layers.has_key('bbox_pred') and cfg.TRAIN.BBOX_NORMALIZE_TARGETS:
+        if cfg.TRAIN.BBOX_REG and 'bbox_pred' in net.layers and cfg.TRAIN.BBOX_NORMALIZE_TARGETS:
             # save original values
             with tf.variable_scope('Fast-RCNN', reuse=True):
                 with tf.variable_scope('bbox_pred'):
@@ -96,9 +96,9 @@ class SolverWrapper(object):
         filename = os.path.join(output_dir, filename)
 
         self.saver.save(sess, filename)
-        print 'Wrote snapshot to: {:s}'.format(filename)
+        print('Wrote snapshot to: {:s}'.format(filename))
 
-        if cfg.TRAIN.BBOX_REG and net.layers.has_key('bbox_pred'):
+        if cfg.TRAIN.BBOX_REG and 'bbox_pred' in net.layers:
             # restore net to original state
             sess.run(weights.assign(orig_0))
             sess.run(biases.assign(orig_1))
@@ -113,14 +113,14 @@ class SolverWrapper(object):
         cfg.TRAIN.PROPOSAL_METHOD = 'gt'
         cfg.TRAIN.IMS_PER_BATCH = 1
         cfg.TRAIN.STEPSIZE = 60000
-        print 'Init model: {}'.format(init_model)
+        print('Init model: {}'.format(init_model))
         print('Using config:')
         pprint.pprint(cfg)
 
         roidb, imdb = get_roidb(self.imdb_name)
-        print 'roidb len: {}'.format(len(roidb))
+        print('roidb len: {}'.format(len(roidb)))
         output_dir = get_output_dir(imdb)
-        print 'Output will be saved to `{:s}`'.format(output_dir)
+        print('Output will be saved to `{:s}`'.format(output_dir))
 
         # get data_layer
         data_layer = RoIDataLayer(roidb, imdb.num_classes)
@@ -147,8 +147,8 @@ class SolverWrapper(object):
             # intialize variables
             sess.run(tf.global_variables_initializer())
             try:
-                print ('Loading pretrained model '
-                   'weights from {:s}').format(init_model)
+                print(('Loading pretrained model '
+                   'weights from {:s}').format(init_model))
                 self.net.load(init_model, sess, True)
             except:
                 raise 'Check your pretrained model {:s}'.format(init_model)
@@ -161,8 +161,8 @@ class SolverWrapper(object):
             except tf.errors.FailedPreconditionError:
                 uninitialized_vars.append(var)
 
-        print 'uninitialized_vars in RPN:'
-        print uninitialized_vars
+        print('uninitialized_vars in RPN:')
+        print(uninitialized_vars)
 
         init_new_vars_op = tf.variables_initializer(uninitialized_vars)
         sess.run(init_new_vars_op)
@@ -170,7 +170,7 @@ class SolverWrapper(object):
 
         last_snapshot_iter = -1
         timer = Timer()
-        for iter in xrange(max_iter):
+        for iter in range(max_iter):
             timer.tic()
 
             # learning rate
@@ -201,10 +201,10 @@ class SolverWrapper(object):
             _diff_time = timer.toc(average=False)
 
             if (iter) % (cfg.TRAIN.DISPLAY) == 0:
-                print 'iter: %d / %d, total loss: %.4f, rpn_loss_cls: %.4f, rpn_loss_box: %.4f, lr: %.10f'%\
+                print('iter: %d / %d, total loss: %.4f, rpn_loss_cls: %.4f, rpn_loss_box: %.4f, lr: %.10f'%\
                         (iter, max_iter, rpn_loss_cls_value + rpn_loss_box_value,\
-                         rpn_loss_cls_value, rpn_loss_box_value, self.lr.eval())
-                print 'speed: {:.3f}s / iter'.format(_diff_time)
+                         rpn_loss_cls_value, rpn_loss_box_value, self.lr.eval()))
+                print('speed: {:.3f}s / iter'.format(_diff_time))
 
             if (iter+1) % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = iter
@@ -223,10 +223,10 @@ class SolverWrapper(object):
         pprint.pprint(cfg)
 
         imdb = get_imdb(self.imdb_name)
-        print 'Loaded dataset `{:s}` for proposal generation'.format(imdb.name)
+        print('Loaded dataset `{:s}` for proposal generation'.format(imdb.name))
 
         output_dir = get_output_dir(imdb)
-        print 'Output will be saved to `{:s}`'.format(output_dir)
+        print('Output will be saved to `{:s}`'.format(output_dir))
 
         # Generate proposals on the imdb
         def imdb_proposals(sess, imdb):
@@ -249,14 +249,14 @@ class SolverWrapper(object):
                 return boxes
 
             _t = Timer()
-            imdb_boxes = [[] for _ in xrange(imdb.num_images)]
-            for i in xrange(imdb.num_images):
+            imdb_boxes = [[] for _ in range(imdb.num_images)]
+            for i in range(imdb.num_images):
                 im = cv2.imread(imdb.image_path_at(i))
                 _t.tic()
                 imdb_boxes[i] = im_proposals(sess, im)
                 _t.toc()
-                print 'im_proposals: {:d}/{:d} {:.3f}s' \
-                      .format(i + 1, imdb.num_images, _t.average_time)
+                print('im_proposals: {:d}/{:d} {:.3f}s' \
+                      .format(i + 1, imdb.num_images, _t.average_time))
 
             return imdb_boxes
 
@@ -266,8 +266,8 @@ class SolverWrapper(object):
         rpn_proposals_path = os.path.join(
             output_dir, rpn_net_name + '_proposals.pkl')
         with open(rpn_proposals_path, 'wb') as f:
-            cPickle.dump(rpn_proposals, f, cPickle.HIGHEST_PROTOCOL)
-        print 'Wrote RPN proposals to {}'.format(rpn_proposals_path)
+            pickle.dump(rpn_proposals, f, pickle.HIGHEST_PROTOCOL)
+        print('Wrote RPN proposals to {}'.format(rpn_proposals_path))
 
         return rpn_proposals_path
 
@@ -280,20 +280,20 @@ class SolverWrapper(object):
         cfg.TRAIN.PROPOSAL_METHOD = 'rpn'   # use pre-computed RPN proposals instead
         cfg.TRAIN.IMS_PER_BATCH = 2
         cfg.TRAIN.STEPSIZE = 30000
-        print 'Init model: {}'.format(init_model)
-        print 'RPN proposals: {}'.format(rpn_file)
+        print('Init model: {}'.format(init_model))
+        print('RPN proposals: {}'.format(rpn_file))
         print('Using config:')
         pprint.pprint(cfg)
 
         roidb, imdb = get_roidb(self.imdb_name, rpn_file)
-        print 'roidb len: {}'.format(len(roidb))
+        print('roidb len: {}'.format(len(roidb)))
 
-        print 'Computing bounding-box regression targets...'
+        print('Computing bounding-box regression targets...')
         self.bbox_means, self.bbox_stds = rdl_roidb.add_bbox_regression_targets(roidb)
-        print 'done'
+        print('done')
 
         output_dir = get_output_dir(imdb)
-        print 'Output will be saved to `{:s}`'.format(output_dir)
+        print('Output will be saved to `{:s}`'.format(output_dir))
 
         # get data_layer
         data_layer = RoIDataLayer(roidb, imdb.num_classes)
@@ -320,8 +320,8 @@ class SolverWrapper(object):
             # intialize variables
             sess.run(tf.global_variables_initializer())
             try:
-                print ('Loading pretrained model '
-                   'weights from {:s}').format(init_model)
+                print(('Loading pretrained model '
+                   'weights from {:s}').format(init_model))
                 self.net.load(init_model, sess, True)
             except:
                 raise 'Check your pretrained model {:s}'.format(init_model)
@@ -334,8 +334,8 @@ class SolverWrapper(object):
             except tf.errors.FailedPreconditionError:
                 uninitialized_vars.append(var)
 
-        print 'uninitialized_vars in Fast-RCNN:'
-        print uninitialized_vars
+        print('uninitialized_vars in Fast-RCNN:')
+        print(uninitialized_vars)
 
         init_new_vars_op = tf.variables_initializer(uninitialized_vars)
         sess.run(init_new_vars_op)
@@ -343,7 +343,7 @@ class SolverWrapper(object):
 
         last_snapshot_iter = -1
         timer = Timer()
-        for iter in xrange(max_iter):
+        for iter in range(max_iter):
             timer.tic()
 
             # learning rate
@@ -380,10 +380,10 @@ class SolverWrapper(object):
             _diff_time = timer.toc(average=False)
 
             if (iter) % (cfg.TRAIN.DISPLAY) == 0:
-                print 'iter: %d / %d, total loss: %.4f, loss_cls: %.4f, loss_box: %.4f, lr: %.10f'%\
+                print('iter: %d / %d, total loss: %.4f, loss_cls: %.4f, loss_box: %.4f, lr: %.10f'%\
                         (iter, max_iter, loss_cls_value + loss_box_value,\
-                         loss_cls_value, loss_box_value, self.lr.eval())
-                print 'speed: {:.3f}s / iter'.format(_diff_time)
+                         loss_cls_value, loss_box_value, self.lr.eval()))
+                print('speed: {:.3f}s / iter'.format(_diff_time))
 
             if (iter+1) % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = iter
@@ -395,46 +395,46 @@ class SolverWrapper(object):
     def train_model(self, sess, vs_names, max_iters):
         """Network training loop."""
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 1 RPN, init from ImageNet model'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 1 RPN, init from ImageNet model')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage1_RPN'
 
         self.train_rpn(sess, vs_names[0], max_iters[0], init_model=self.pretrained_model)
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 1 RPN, generate proposals'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 1 RPN, generate proposals')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         rpn_file_stage1 = self.rpn_generate(sess, cfg.TRAIN.SNAPSHOT_INFIX)
         #rpn_file_stage1 = 'output/FPN_alt_opt/voc_0712_trainval/stage1_RPN_proposals.pkl'
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 1 Fast R-CNN using RPN proposals, init from ImageNet model'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 1 Fast R-CNN using RPN proposals, init from ImageNet model')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage1_Fast_RCNN'
 
         self.train_fast_rcnn(sess, vs_names[1], max_iters[1], rpn_file = rpn_file_stage1, init_model=self.pretrained_model)
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 2 RPN, init from stage 1 Fast R-CNN model'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 2 RPN, init from stage 1 Fast R-CNN model')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage2_RPN'
 
         self.train_rpn(sess, vs_names[2], max_iters[2])
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 2 RPN, generate proposals'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 2 RPN, generate proposals')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         rpn_file_stage2 = self.rpn_generate(sess, cfg.TRAIN.SNAPSHOT_INFIX)
 
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Stage 2 Fast R-CNN, init from stage 2 RPN R-CNN model'
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Stage 2 Fast R-CNN, init from stage 2 RPN R-CNN model')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage2_Fast_RCNN'
 
@@ -442,9 +442,9 @@ class SolverWrapper(object):
 
 def get_roidb(imdb_name, rpn_file=None):
     imdb = get_imdb(imdb_name)
-    print 'Loaded dataset `{:s}` for training'.format(imdb.name)
+    print('Loaded dataset `{:s}` for training'.format(imdb.name))
     imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)
-    print 'Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD)
+    print('Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD))
     if rpn_file is not None:
         imdb.config['rpn_file'] = rpn_file
     roidb = get_training_roidb(imdb)
@@ -453,13 +453,13 @@ def get_roidb(imdb_name, rpn_file=None):
 def get_training_roidb(imdb):
     """Returns a roidb (Region of Interest database) for use in training."""
     if cfg.TRAIN.USE_FLIPPED:
-        print 'Appending horizontally-flipped training examples...'
+        print('Appending horizontally-flipped training examples...')
         imdb.append_flipped_images()
-        print 'done'
+        print('done')
 
-    print 'Preparing training data...'
+    print('Preparing training data...')
     rdl_roidb.prepare_roidb(imdb)
-    print 'done'
+    print('done')
 
     return imdb.roidb
 
@@ -507,6 +507,6 @@ def train_net(network, imdb_name, vs_names, pretrained_model=None, max_iters=[80
     config.gpu_options.per_process_gpu_memory_fraction = 0.90
     with tf.Session(config=config) as sess:
         sw = SolverWrapper(sess, network, imdb_name, pretrained_model=pretrained_model)
-        print 'Solving...'
+        print('Solving...')
         sw.train_model(sess, vs_names, max_iters)
-        print 'done solving'
+        print('done solving')

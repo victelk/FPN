@@ -68,7 +68,7 @@ def proposal_target_layer(rpn_rois, gt_boxes, gt_ishard, dontcare_areas, _num_cl
             'Only single item batches are supported'
 
     num_images = 1
-    rois_per_image = cfg.TRAIN.BATCH_SIZE / num_images
+    rois_per_image = cfg.TRAIN.BATCH_SIZE // num_images
     fg_rois_per_image = int(np.round(cfg.TRAIN.FG_FRACTION * rois_per_image))
 
     # Sample rois with classification labels and bounding box regression
@@ -119,7 +119,7 @@ def proposal_target_layer(rpn_rois, gt_boxes, gt_ishard, dontcare_areas, _num_cl
         level_idx = level(roi) - 2
         leveled_idxs[level_idx].append(idx)
 
-    for level_idx in xrange(0, 5):
+    for level_idx in range(0, 5):
         leveled_rois[level_idx] = rois[leveled_idxs[level_idx]]
         leveled_labels[level_idx] = labels[leveled_idxs[level_idx]]
         leveled_bbox_targets[level_idx] = bbox_targets[leveled_idxs[level_idx]]

@@ -90,10 +90,10 @@ if __name__ == '__main__':
     '''
 
     device_name = '/gpu:{:d}'.format(args.gpu_id)
-    print device_name
+    print(device_name)
 
     network = get_network(args.network_name)
-    print 'Use network `{:s}` in training'.format(args.network_name)
+    print('Use network `{:s}` in training'.format(args.network_name))
 
     vs_names = [['res3_5', 'Top-Down', 'RPN'],
                 ['res3_5', 'Top-Down', 'Fast-RCNN'],

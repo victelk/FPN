@@ -90,13 +90,13 @@ def anchor_target_layer(rpn_cls_score_P2, \
         height, width = rpn_cls_score.shape[1:3]
 
         if DEBUG:
-            print 'AnchorTargetLayer: height', height, 'width', width
-            print ''
-            print 'im_size: ({}, {})'.format(im_info[0], im_info[1])
-            print 'scale: {}'.format(im_info[2])
-            print 'height, width: ({}, {})'.format(height, width)
-            print 'rpn: gt_boxes.shape', gt_boxes.shape
-            print 'rpn: gt_boxes', gt_boxes
+            print('AnchorTargetLayer: height', height, 'width', width)
+            print('')
+            print('im_size: ({}, {})'.format(im_info[0], im_info[1]))
+            print('scale: {}'.format(im_info[2]))
+            print('height, width: ({}, {})'.format(height, width))
+            print('rpn: gt_boxes.shape', gt_boxes.shape)
+            print('rpn: gt_boxes', gt_boxes)
 
         # 1. Generate proposals from bbox deltas and shifted anchors
         shift_x = np.arange(0, width) * _feat_strides[idx]
@@ -127,16 +127,16 @@ def anchor_target_layer(rpn_cls_score_P2, \
     #------------------------------------------------------------------------------------------
 
     # only keep anchors inside the image
-    inds_inside = [ind for ind in xrange(total_anchors)]
+    inds_inside = [ind for ind in range(total_anchors)]
 
     if DEBUG:
-        print 'total_anchors', total_anchors
-        print 'inds_inside', len(inds_inside)
+        print('total_anchors', total_anchors)
+        print('inds_inside', len(inds_inside))
 
     # keep only inside anchors
     anchors = all_anchors[inds_inside, :]
     if DEBUG:
-        print 'anchors.shape', anchors.shape
+        print('anchors.shape', anchors.shape)
 
     # label: 1 is positive, 0 is negative, -1 is dont care
     # (A)
@@ -243,10 +243,10 @@ def anchor_target_layer(rpn_cls_score_P2, \
         _counts += np.sum(labels == 1)
         means = _sums / _counts
         stds = np.sqrt(_squared_sums / _counts - means ** 2)
-        print 'means:'
-        print means
-        print 'stdevs:'
-        print stds
+        print('means:')
+        print(means)
+        print('stdevs:')
+        print(stds)
 
     # map up to original set of anchors
     labels = _unmap(labels, total_anchors, inds_inside, fill=-1)
@@ -255,14 +255,14 @@ def anchor_target_layer(rpn_cls_score_P2, \
     bbox_outside_weights = _unmap(bbox_outside_weights, total_anchors, inds_inside, fill=0)
 
     if DEBUG:
-        print 'rpn: max max_overlap', np.max(max_overlaps)
-        print 'rpn: num_positive', np.sum(labels == 1)
-        print 'rpn: num_negative', np.sum(labels == 0)
+        print('rpn: max max_overlap', np.max(max_overlaps))
+        print('rpn: num_positive', np.sum(labels == 1))
+        print('rpn: num_negative', np.sum(labels == 0))
         _fg_sum += np.sum(labels == 1)
         _bg_sum += np.sum(labels == 0)
         _count += 1
-        print 'rpn: num_positive avg', _fg_sum / _count
-        print 'rpn: num_negative avg', _bg_sum / _count
+        print('rpn: num_positive avg', _fg_sum / _count)
+        print('rpn: num_negative avg', _bg_sum / _count)
 
     rpn_labels = labels
     rpn_bbox_targets = bbox_targets

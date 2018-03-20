@@ -31,7 +31,7 @@ case $DATASET in
     TRAIN_IMDB="voc_2007_trainval"
     TEST_IMDB="voc_2007_test"
     PT_DIR="pascal_voc"
-    ITERS=200000
+    ITERS=4000
     CFG="experiments/cfgs/FPN_end2end.yml"
     ;;
   *)

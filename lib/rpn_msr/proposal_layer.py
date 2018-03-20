@@ -59,6 +59,8 @@ def proposal_layer(rpn_cls_prob_reshape_P2, rpn_bbox_pred_P2, \
     #layer_params = yaml.load(self.param_str_)
 
     """
+    if type(cfg_key) == bytes:
+        cfg_key = cfg_key.decode('utf-8')
     anchor_scales = np.array(anchor_sizes) / np.array(_feat_strides)
 
     # _anchors = [generate_anchors(base_size=_feat_stride, scales=[anchor_scale]) for _feat_stride, anchor_scale in zip(_feat_strides, anchor_scales)]
@@ -101,12 +103,12 @@ def proposal_layer(rpn_cls_prob_reshape_P2, rpn_bbox_pred_P2, \
     scores = np.concatenate(scores, axis=0)
 
     if DEBUG:
-        print 'im_size: ({}, {})'.format(im_info[0], im_info[1])
-        print 'scale: {}'.format(im_info[2])
+        print('im_size: ({}, {})'.format(im_info[0], im_info[1]))
+        print('scale: {}'.format(im_info[2]))
 
     # 1. Generate proposals from bbox deltas and shifted anchors
     if DEBUG:
-        print 'score map size: {}'.format(scores.shape)
+        print('score map size: {}'.format(scores.shape))
 
     def gen_shift(height, width, _feat_stride):
         # Enumerate all shifts
@@ -197,7 +199,7 @@ def proposal_layer(rpn_cls_prob_reshape_P2, rpn_bbox_pred_P2, \
             level_idx = level(roi) - 2
             leveled_idxs[level_idx].append(idx)
 
-        for level_idx in xrange(0, 5):
+        for level_idx in range(0, 5):
             leveled_rois[level_idx] = rpn_rois[leveled_idxs[level_idx]]
 
         rpn_rois = np.concatenate(leveled_rois, axis=0)
